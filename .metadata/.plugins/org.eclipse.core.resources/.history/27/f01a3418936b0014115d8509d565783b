@@ -1,0 +1,45 @@
+package com.util.database.pojos;
+
+public class Lance {
+	
+	private int id;
+	private String id_objeto;
+	private String id_arrematande;
+	private double valorLance;
+	
+	public Lance(){}
+	public Lance(int id,String id_objeto,String id_arrematante,double valorLance)
+	{
+		this.setId(id);
+		this.setId_objeto(id_objeto);
+		this.setId_arrematande(id_arrematante);
+		this.setValorLance(valorLance);
+	}
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+	public String getId_objeto() {
+		return id_objeto;
+	}
+	public void setId_objeto(String id_objeto) {
+		this.id_objeto = id_objeto;
+	}
+	public String getId_arrematande() {
+		return id_arrematande;
+	}
+	public void setId_arrematande(String id_arrematande) {
+		this.id_arrematande = id_arrematande;
+	}
+	public double getValorLance() {
+		return valorLance;
+	}
+	public void setValorLance(double valorLance) {
+		this.valorLance = valorLance;
+	}
+	
+	
+
+}

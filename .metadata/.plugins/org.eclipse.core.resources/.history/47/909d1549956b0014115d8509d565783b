@@ -1,0 +1,5 @@
+package com.util.database.daos;
+
+public class ArrematanteDao {
+
+}

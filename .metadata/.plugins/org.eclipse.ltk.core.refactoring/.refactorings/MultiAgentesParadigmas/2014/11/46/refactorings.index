@@ -1,0 +1,15 @@
+1415921386322	Encapsulate field 'nome'
+1415921399980	Encapsulate field 'valorDinheiro'
+1415921593001	Encapsulate field 'id'
+1415921606484	Encapsulate field 'nome'
+1415921623089	Encapsulate field 'lanceInicialValor'
+1415921630969	Encapsulate field 'valorIncremento'
+1415922140499	Encapsulate field 'id'
+1415922147242	Encapsulate field 'id_objeto'
+1415922154053	Encapsulate field 'id_arrematande'
+1415922161350	Encapsulate field 'valorLance'
+1415923487136	Copy file
+1415923498364	Copy file
+1415923509650	Copy file
+1415923516847	Rename resource 'Arrematante.hbm.xml'
+1415923795305	Encapsulate field 'Id'
