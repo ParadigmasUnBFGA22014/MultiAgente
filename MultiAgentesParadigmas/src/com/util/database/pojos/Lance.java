@@ -1,7 +1,13 @@
 package com.util.database.pojos;
 
-public class Lance {
+import jade.util.leap.Serializable;
+
+public class Lance  implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private int id;
 	private int id_objeto;
 	private int id_arrematande;

@@ -1,12 +1,17 @@
 package com.util.database.pojos;
 
-public class Objeto {
+import jade.util.leap.Serializable;
+
+public class Objeto implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private int id;
 	private String nome;
 	private Byte foto;
-	private double lanceInicialValor;
-	private double valorIncremento;
+	
 	
 	
 	public Objeto(){}
@@ -14,8 +19,7 @@ public class Objeto {
 	{
 		this.id=id;
 		this.nome=nome;
-		this.lanceInicialValor=lanceInicialValor;
-		this.valorIncremento=valorIncremento;
+		
 		
 	}
 	
@@ -31,18 +35,7 @@ public class Objeto {
 	public void setNome(String nome) {
 		this.nome = nome;
 	}
-	public double getLanceInicialValor() {
-		return lanceInicialValor;
-	}
-	public void setLanceInicialValor(double lanceInicialValor) {
-		this.lanceInicialValor = lanceInicialValor;
-	}
-	public double getValorIncremento() {
-		return valorIncremento;
-	}
-	public void setValorIncremento(double valorIncremento) {
-		this.valorIncremento = valorIncremento;
-	}
+	
 	
 
 }
