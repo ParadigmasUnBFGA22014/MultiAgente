@@ -33,6 +33,13 @@ import com.util.database.pojos.Lote;
 		{
 			DFAgentDescription descricaoAgente = new DFAgentDescription();
 			descricaoAgente.setName(getAID());
+			
+			ServiceDescription descricaoServico= new ServiceDescription();
+			descricaoServico.setName("auxiliar");
+			descricaoServico.setType("leilao");
+			
+			descricaoAgente.addServices(descricaoServico);
+	
 			DFService.register(this, descricaoAgente);
 			
 			DFAgentDescription paginasAmarelas= new DFAgentDescription();

@@ -1,21 +1,18 @@
 package com.core.agents;
 
-import java.util.ArrayList;
-
-import com.util.database.pojos.Lote;
-import com.util.database.pojos.Objeto;
-
 import jade.core.AID;
 import jade.core.Agent;
-import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
-import jade.core.behaviours.SequentialBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
+
+import java.util.ArrayList;
+
+import com.util.database.pojos.Lote;
 
 
 public class Leiloeiro extends Agent{
@@ -24,7 +21,8 @@ public class Leiloeiro extends Agent{
 	private int qtdLances=1;
 	private Leiloeiro leiloeiro=this;
 	private static final long serialVersionUID = 1L;
-	
+	private AID agenteAuxiliarAID=null;
+	private DFAgentDescription[] agenteAuxiliar=null;
 	protected void setup()
 	{
 		try
@@ -37,34 +35,55 @@ public class Leiloeiro extends Agent{
 			
 			DFService.register(this, descricaoAgente);
 			
+			DFAgentDescription paginasAmarelas= new DFAgentDescription();
+			ServiceDescription servicoProcurado= new ServiceDescription();
 			
-			addBehaviour(new OneShotBehaviour(this)
+			servicoProcurado.setName("arrematante");
+			servicoProcurado.setType("leilao");
+			
+			paginasAmarelas.addServices(servico);
+			
+			agenteAuxiliar= DFService.search(leiloeiro, paginasAmarelas);
+			
+			if(agenteAuxiliar!=null)
 			{
+				agenteAuxiliarAID=agenteAuxiliar[0].getName();
+				System.out.println("Achei um auxiliar.. vamos iniciar o leilao.");
 				
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public void action() 
+				addBehaviour(new OneShotBehaviour(this)
 				{
-					try
-					{
-						ACLMessage iniciarLeilao= new ACLMessage(ACLMessage.INFORM);
-						iniciarLeilao.addReceiver(new AID("Auxiliar",AID.ISLOCALNAME));
-						iniciarLeilao.setConversationId(ConversationsAID.AUTORIZA_INICIO_LEILAO);
-						
-						myAgent.send(iniciarLeilao);
-						
-						System.out.println("Autorizei o leilao");
-						
-						addBehaviour(new Leiloar(lotes(),leiloeiro));
-						
-					}catch(Exception e)
-					{
-						e.printStackTrace();
-					}
 					
-				}
-			});
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public void action() 
+					{
+						try
+						{
+							ACLMessage iniciarLeilao= new ACLMessage(ACLMessage.INFORM);
+							iniciarLeilao.addReceiver(agenteAuxiliarAID);
+							iniciarLeilao.setConversationId(ConversationsAID.AUTORIZA_INICIO_LEILAO);
+							
+							myAgent.send(iniciarLeilao);
+							
+							System.out.println("Autorizei o leilao");
+							
+							addBehaviour(new Leiloar(lotes(),leiloeiro));
+							
+						}catch(Exception e)
+						{
+							e.printStackTrace();
+						}
+						
+					}
+				});
+			}else
+			{
+				System.out.println("N‹o tenho um auxiliar para me ajudar, nao posso iniciar o leilao!");
+			}
+			
+			
+			
 			
 	
 			
@@ -135,7 +154,7 @@ public class Leiloeiro extends Agent{
 						loteVendido.setConversationId(ConversationsAID.LOTE_VENDIDO);
 						loteVendido.setContent(nomeGanhador);
 						loteVendido.setContentObject(lote);
-						loteVendido.addReceiver(new AID("Auxiliar",AID.ISLOCALNAME));
+						loteVendido.addReceiver(agenteAuxiliarAID);
 						
 						myAgent.send(loteVendido);
 						
@@ -145,7 +164,7 @@ public class Leiloeiro extends Agent{
 							lotes.remove(0);
 							
 							ACLMessage loteAvenda= new ACLMessage(ACLMessage.INFORM);
-							loteAvenda.addReceiver(new AID("Auxiliar",AID.ISLOCALNAME));
+							loteAvenda.addReceiver(agenteAuxiliarAID);
 							loteAvenda.setContentObject(lote);
 							loteAvenda.setConversationId(ConversationsAID.LOTE_A_VENDA);
 							
@@ -155,7 +174,7 @@ public class Leiloeiro extends Agent{
 						{
 							ACLMessage leilaoEncerrado= new ACLMessage(ACLMessage.INFORM);
 							leilaoEncerrado.setConversationId(ConversationsAID.LEILAO_ENCERRADO);
-							leilaoEncerrado.addReceiver(new AID("Auxiliar", AID.ISLOCALNAME));
+							leilaoEncerrado.addReceiver(agenteAuxiliarAID);
 							
 							myAgent.send(leilaoEncerrado);
 							myAgent.removeBehaviour(this);
