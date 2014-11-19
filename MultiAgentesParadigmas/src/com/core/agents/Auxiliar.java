@@ -1,10 +1,5 @@
 package com.core.agents;
 
-import java.io.IOException;
-import java.io.Serializable;
-
-import com.util.database.pojos.Lote;
-
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -13,20 +8,57 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
-public class Auxiliar  extends Agent{
+import com.util.database.pojos.Lote;
+
+
+	public class Auxiliar  extends Agent{
 	private Auxiliar auxiliar;
+	private Map<String,Double> listaArrematantes;
+	private DFAgentDescription[] agentesArrematantes;
+	private boolean travaPropostas;
 	protected void setup()
 	{
 		auxiliar=this;
+		listaArrematantes= new HashMap<String, Double>();
+		travaPropostas=false;
+		
 		try
 		{
 			DFAgentDescription descricaoAgente = new DFAgentDescription();
 			descricaoAgente.setName(getAID());
 			DFService.register(this, descricaoAgente);
+			
+			DFAgentDescription paginasAmarelas= new DFAgentDescription();
+			ServiceDescription servico= new ServiceDescription();
+			
+			servico.setName("arrematante");
+			servico.setType("leilao");
+			
+			paginasAmarelas.addServices(servico);
+			
+			agentesArrematantes= DFService.search(auxiliar, paginasAmarelas);
+			
+			if(agentesArrematantes!=null)
+			{
+				System.out.println("Temos "+agentesArrematantes.length+" Agentes virtuais que participaram do leil‹o");
+			
+				
+				for(DFAgentDescription agente: agentesArrematantes)
+				{
+					System.out.println(agente.getName().getLocalName()+ " Vai participar do leilao.");
+					listaArrematantes.put(agente.getName().getLocalName().toString(), 0.0);
+						
+				}
+				
+				System.out.println(" Lista com nomes de arrematantes cadastrada,  "+listaArrematantes.size()+ " pessoas participarao.");
+			}
 			
 			
 			//Iniciar auxilio ao leiloeiro
@@ -63,31 +95,6 @@ public class Auxiliar  extends Agent{
 			try
 			{
 				
-				
-				DFAgentDescription paginasAmarelas= new DFAgentDescription();
-				ServiceDescription servico= new ServiceDescription();
-				
-				servico.setName("arrematante");
-				servico.setType("leilao");
-				
-				paginasAmarelas.addServices(servico);
-				
-				DFAgentDescription[] agentesArrematantes= DFService.search(auxiliar, paginasAmarelas);
-				
-				if(agentesArrematantes!=null)
-				{
-					System.out.println("Temos "+agentesArrematantes.length+" Agentes virtuais que participaram do leil‹o");
-				
-					
-					for(DFAgentDescription agente: agentesArrematantes)
-					{
-						System.out.println(agente.getName()+ " Vai participar do leilao.");
-						
-						
-					}
-				}
-			
-				
 				ACLMessage mensagem=myAgent.receive();
 				if(mensagem!=null)
 				{
@@ -95,12 +102,8 @@ public class Auxiliar  extends Agent{
 							&& mensagem.getSender()==(new AID("Leiloeiro",AID.ISLOCALNAME)))
 					{
 						//Liberar acesso web dos agentes humanos 
-						
-						
-						
-						
-						
-						
+						System.out.println("Leilao autorizado ");
+	
 					}
 					if(mensagem.getConversationId().equalsIgnoreCase(ConversationsAID.LOTE_A_VENDA)
 							&& mensagem.getSender()==(new AID("Leiloeiro",AID.ISLOCALNAME)))
@@ -110,7 +113,7 @@ public class Auxiliar  extends Agent{
 						try
 						{
 							//Informa ao Grails qual o lote que esta sendo leiloado
-							
+							System.out.println("Lote a venda ");
 							
 							//Informa aos arrematantes qual lote esta sendo leiloado
 							
@@ -130,7 +133,7 @@ public class Auxiliar  extends Agent{
 							}
 							
 							myAgent.send(mensagemProposta);
-							
+							travaPropostas=false;
 							 							
 						}
 						catch (IOException e) {
@@ -148,12 +151,15 @@ public class Auxiliar  extends Agent{
 					if(mensagem.getConversationId().equalsIgnoreCase(ConversationsAID.LOTE_VENDIDO)
 							&& mensagem.getSender()==(new AID("Leiloeiro",AID.ISLOCALNAME)))
 					{
-						
-					}
-					
-					if(mensagem.getConversationId().equalsIgnoreCase(ConversationsAID.LOTE_VENDIDO)
-							&& mensagem.getSender()==(new AID("Leiloeiro",AID.ISLOCALNAME)))
-					{
+						try
+						{
+							System.out.println("Lote Vendido ");
+							System.out.println("Ganhador"+mensagem.getContent());
+							
+						}catch(Exception e)
+						{
+							e.printStackTrace();
+						}
 						
 					}
 					
@@ -169,23 +175,21 @@ public class Auxiliar  extends Agent{
 						try 
 						{
 							
+							if(!travaPropostas)
+							{
+								propostaArrematanteVirtual.setContent(mensagem.getSender().toString());
+								propostaArrematanteVirtual.setSender(new AID("Leiloeiro",AID.ISLOCALNAME));
+								
+								myAgent.send(propostaArrematanteVirtual);
+								travaPropostas=true;
+							}
 							
-							propostaArrematanteVirtual.setContentObject((Serializable)mensagem.getContentObject());
-							propostaArrematanteVirtual.setSender(new AID("Leiloeiro",AID.ISLOCALNAME));
-							
-							myAgent.send(propostaArrematanteVirtual);
 							
 							
-						} catch (IOException e) 
+						} catch (Exception e) 
 						{
-
 							e.printStackTrace();
-						} catch (UnreadableException e) 
-						{
-							
-							e.printStackTrace();
-						}
-						
+						} 						
 					}
 					
 
@@ -193,7 +197,7 @@ public class Auxiliar  extends Agent{
 				}else block();
 				
 				
-			}catch(FIPAException e)
+			}catch(Exception e)
 			{
 				e.printStackTrace();
 			}

@@ -13,6 +13,7 @@ public class Lote  implements Serializable{
 	private Integer numeroLote;
 	private ArrayList<Objeto> objetosList;
 	
+	private double lanceCorrente;
 	private double lanceInicialValor;
 	private double valorIncremento;
 	
@@ -49,6 +50,12 @@ public class Lote  implements Serializable{
 	}
 	public void setObjetosList(ArrayList<Objeto> objetosList) {
 		this.objetosList = objetosList;
+	}
+	public double getLanceCorrente() {
+		return lanceCorrente;
+	}
+	public void setLanceCorrente(double lanceCorrente) {
+		this.lanceCorrente = lanceCorrente;
 	}
 
 }

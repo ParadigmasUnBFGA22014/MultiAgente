@@ -26,14 +26,6 @@ public class ObjetoTest {
 		fail("Not yet implemented");
 	}
 
-	@Test
-	public void testGetLanceInicialValor() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetValorIncremento() {
-		fail("Not yet implemented");
-	}
+	
 
 }
