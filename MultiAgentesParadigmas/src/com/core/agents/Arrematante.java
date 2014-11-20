@@ -85,12 +85,14 @@ public class Arrematante extends Agent {
 				{
 					if(mensagem.getPerformative()==ACLMessage.CFP)
 					{
-						if(ofertar((Lote) mensagem.getContentObject()))
+						if(ofertar((Lote) mensagem.getContentObject(), mensagem.getContent()))
 						{
 							resposta = mensagem.createReply();
 							resposta.setPerformative(ACLMessage.PROPOSE);
 							
 							myAgent.send(resposta);
+							
+							System.out.println("O arremantante "+myAgent.getAID().getLocalName()+" deu um lance!");
 						}
 					}
 					
@@ -102,15 +104,18 @@ public class Arrematante extends Agent {
 			}
 			
 		}
-		private boolean ofertar(Lote lote)
+		private boolean ofertar(Lote lote, String ganhadorAtual)
 		{
 			//Criterios de escolha 
-			if(lote.getLanceCorrente()<arrematante.valorCarteira)
+			if(lote.getLanceCorrente()<arrematante.valorCarteira && ganhadorAtual != this.getAgent().getLocalName())
 			{
 				return true;
 			}
 			else
-			return false;
+			{
+				System.out.println("O arremantante "+myAgent.getAID().getLocalName()+" não possui mais dinheiro para esse lote!");
+				return false;
+			}
 		}
 		
 	}

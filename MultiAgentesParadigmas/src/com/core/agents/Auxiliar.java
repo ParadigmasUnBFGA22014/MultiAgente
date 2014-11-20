@@ -23,6 +23,7 @@ import com.util.database.pojos.Lote;
 	private Map<String,Double> listaArrematantes;
 	private DFAgentDescription[] agentesArrematantes;
 	private boolean travaPropostas;
+	
 	protected void setup()
 	{
 		auxiliar=this;
@@ -54,7 +55,7 @@ import com.util.database.pojos.Lote;
 			
 			if(agentesArrematantes!=null)
 			{
-				System.out.println("Temos "+agentesArrematantes.length+" Agentes virtuais que participaram do leil‹o");
+				System.out.println("Temos "+agentesArrematantes.length+" Agentes virtuais que participaram do leilao");
 			
 				
 				for(DFAgentDescription agente: agentesArrematantes)
@@ -97,37 +98,31 @@ import com.util.database.pojos.Lote;
 		@Override
 		public void action()
 		{
-			
-			
 			try
 			{
-				
 				ACLMessage mensagem=myAgent.receive();
 				if(mensagem!=null)
 				{
-					if(mensagem.getConversationId().equalsIgnoreCase(ConversationsAID.AUTORIZA_INICIO_LEILAO) 
-							&& mensagem.getSender()==(new AID("Leiloeiro",AID.ISLOCALNAME)))
+					if(mensagem.getSender().getLocalName().equalsIgnoreCase((new AID("Leiloeiro",AID.ISLOCALNAME)).getLocalName())
+							&& mensagem.getConversationId().equalsIgnoreCase(ConversationsAID.AUTORIZA_INICIO_LEILAO))
 					{
 						//Liberar acesso web dos agentes humanos 
-						System.out.println("Leilao autorizado ");
+						System.out.println("Leilao autorizado");
 	
 					}
-					if(mensagem.getConversationId().equalsIgnoreCase(ConversationsAID.LOTE_A_VENDA)
-							&& mensagem.getSender()==(new AID("Leiloeiro",AID.ISLOCALNAME)))
+					if(mensagem.getSender().getLocalName().equalsIgnoreCase((new AID("Leiloeiro",AID.ISLOCALNAME)).getLocalName())
+							&& mensagem.getConversationId().equalsIgnoreCase(ConversationsAID.LOTE_A_VENDA))
 					{
-						
-						
 						try
 						{
-							//Informa ao Grails qual o lote que esta sendo leiloado
-							System.out.println("Lote a venda ");
-							
+							System.out.println("Lote a venda 1234");
 							//Informa aos arrematantes qual lote esta sendo leiloado
-							
+							System.out.println("Ã© adki lance corrente: " + ((Lote)mensagem.getContentObject()).getLanceCorrente());
 							Lote lote= (Lote)mensagem.getContentObject();
 							ACLMessage mensagemProposta= new ACLMessage(ACLMessage.CFP);
 							
 							mensagemProposta.setContentObject(lote);
+							mensagemProposta.setContent(mensagem.getContent());
 							
 							if(agentesArrematantes!=null)
 							{
@@ -155,8 +150,8 @@ import com.util.database.pojos.Lote;
 
 						
 					}
-					if(mensagem.getConversationId().equalsIgnoreCase(ConversationsAID.LOTE_VENDIDO)
-							&& mensagem.getSender()==(new AID("Leiloeiro",AID.ISLOCALNAME)))
+					if(mensagem.getSender().getLocalName().equalsIgnoreCase((new AID("Leiloeiro",AID.ISLOCALNAME)).getLocalName())
+							&& mensagem.getConversationId().equalsIgnoreCase(ConversationsAID.LOTE_VENDIDO))
 					{
 						try
 						{
@@ -170,8 +165,8 @@ import com.util.database.pojos.Lote;
 						
 					}
 					
-					if(mensagem.getConversationId().equalsIgnoreCase(ConversationsAID.LEILAO_ENCERRADO)
-							&& mensagem.getSender()==(new AID("Leiloeiro",AID.ISLOCALNAME)))
+					if(mensagem.getSender().getLocalName().equalsIgnoreCase((new AID("Leiloeiro",AID.ISLOCALNAME)).getLocalName())
+							&& mensagem.getConversationId().equalsIgnoreCase(ConversationsAID.LEILAO_ENCERRADO))
 					{
 						
 					}
@@ -179,19 +174,18 @@ import com.util.database.pojos.Lote;
 					if(mensagem.getPerformative()==ACLMessage.PROPOSE)
 					{
 						ACLMessage propostaArrematanteVirtual= new ACLMessage(ACLMessage.PROPOSE);
+						propostaArrematanteVirtual.setPerformative(ACLMessage.PROPOSE);
 						try 
 						{
 							
 							if(!travaPropostas)
 							{
-								propostaArrematanteVirtual.setContent(mensagem.getSender().toString());
-								propostaArrematanteVirtual.setSender(new AID("Leiloeiro",AID.ISLOCALNAME));
+								propostaArrematanteVirtual.setContent(mensagem.getSender().getLocalName());
+								propostaArrematanteVirtual.addReceiver(new AID("Leiloeiro",AID.ISLOCALNAME));
 								
 								myAgent.send(propostaArrematanteVirtual);
 								travaPropostas=true;
 							}
-							
-							
 							
 						} catch (Exception e) 
 						{
