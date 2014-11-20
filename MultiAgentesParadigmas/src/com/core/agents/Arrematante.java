@@ -28,13 +28,13 @@ public class Arrematante extends Agent {
 			DFAgentDescription descricaoAgente= new DFAgentDescription();
 			ServiceDescription servico= new ServiceDescription();
 			
-			servico.setName("arrematante");
+			servico.setName("arremantante");
 			servico.setType("leilao");
 			
 			descricaoAgente.setName(this.getAID());
 			descricaoAgente.addServices(servico);
 			
-			DFService.register(this, descricaoAgente);
+			DFService.register(arrematante, descricaoAgente);
 			
 			Object[] argumentos= getArguments();
 			if(argumentos!=null && argumentos.length>0)

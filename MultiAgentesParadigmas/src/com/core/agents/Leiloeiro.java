@@ -4,6 +4,8 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.SequentialBehaviour;
+import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -19,79 +21,37 @@ public class Leiloeiro extends Agent{
 	
 
 	private int qtdLances=1;
-	private Leiloeiro leiloeiro=this;
+	private Leiloeiro leiloeiro=null;
 	private static final long serialVersionUID = 1L;
 	private AID agenteAuxiliarAID=null;
-	private DFAgentDescription[] agenteAuxiliar=null;
+	private DFAgentDescription[] agenteArremantantes=null;
+	
 	protected void setup()
 	{
 		try
 		{
+			leiloeiro=this;
+			//Registrando nas paginas amarelas
 			DFAgentDescription descricaoAgente= new DFAgentDescription();
 			ServiceDescription servico = new ServiceDescription();
 			servico.setName("leiloeiro");
 			servico.setType("leilao");
 			descricaoAgente.addServices(servico);
 			
-			DFService.register(this, descricaoAgente);
+			DFService.register(leiloeiro, descricaoAgente);		
 			
-			DFAgentDescription paginasAmarelas= new DFAgentDescription();
-			ServiceDescription servicoProcurado= new ServiceDescription();
+			System.out.println("Ol‡ meu nome Ž "+this.getLocalName()+ " e serei o leiloeiro de hoje!");
 			
-			servicoProcurado.setName("arrematante");
-			servicoProcurado.setType("leilao");
-			
-			paginasAmarelas.addServices(servico);
-			
-			agenteAuxiliar= DFService.search(leiloeiro, paginasAmarelas);
-			
-			if(agenteAuxiliar!=null)
-			{
-				agenteAuxiliarAID=agenteAuxiliar[0].getName();
-				System.out.println("Achei um auxiliar.. vamos iniciar o leilao.");
-				
-				addBehaviour(new OneShotBehaviour(this)
-				{
-					
-					private static final long serialVersionUID = 1L;
+			leiloeiro.prepararLeilao();			
 
-					@Override
-					public void action() 
-					{
-						try
-						{
-							ACLMessage iniciarLeilao= new ACLMessage(ACLMessage.INFORM);
-							iniciarLeilao.addReceiver(agenteAuxiliarAID);
-							iniciarLeilao.setConversationId(ConversationsAID.AUTORIZA_INICIO_LEILAO);
-							
-							myAgent.send(iniciarLeilao);
-							
-							System.out.println("Autorizei o leilao");
-							
-							addBehaviour(new Leiloar(lotes(),leiloeiro));
-							
-						}catch(Exception e)
-						{
-							e.printStackTrace();
-						}
-						
-					}
-				});
-			}else
-			{
-				System.out.println("N‹o tenho um auxiliar para me ajudar, nao posso iniciar o leilao!");
-			}
-			
-			
-			
-			
-	
 			
 		}catch(FIPAException e)
 		{
 			e.printStackTrace();
 		}
 	}
+	
+	
 	protected void takeDown()
 	{
 		try
@@ -191,6 +151,68 @@ public class Leiloeiro extends Agent{
 						
 		}
 		
+	}
+	
+	private void prepararLeilao()
+	{
+		 SequentialBehaviour prepararLeilao= new SequentialBehaviour(leiloeiro);
+		
+		//Procurar agentes arrematantes 
+		prepararLeilao.addSubBehaviour(new OneShotBehaviour(leiloeiro) 
+		{
+			
+			@Override
+			public void action() 
+			{
+				
+				//Buscando agentes arremantantes nas paginas amarelas
+				DFAgentDescription paginasAmarelas= new DFAgentDescription();
+				ServiceDescription servicoProcurado= new ServiceDescription();
+				
+				try
+				{
+					servicoProcurado.setName("arremantante");
+					servicoProcurado.setType("leilao");
+					
+					paginasAmarelas.addServices(servicoProcurado);
+					
+					leiloeiro.agenteArremantantes= DFService.search(leiloeiro, paginasAmarelas);
+					
+					
+					
+					if(leiloeiro.agenteArremantantes!=null  && leiloeiro.agenteArremantantes.length>0)
+					{
+						System.out.println("Muito bom temos "+leiloeiro.agenteArremantantes.length+ " participantes.\n");
+						
+						for(DFAgentDescription arremantantes: leiloeiro.agenteArremantantes)
+						{
+							System.out.println("Ol‡ "+arremantantes.getName().getLocalName()+", bem vindo!");
+						}
+						
+						
+					}else 
+					{
+						System.out.println("Ainda n‹o tem arrematantes no leilao, nao ser‡ possivel iniciar agora ");
+					}
+					
+				
+					
+					
+				}catch(FIPAException e)
+				{
+					e.printStackTrace();
+				}
+				
+					
+				
+			}
+		});
+		
+		addBehaviour(prepararLeilao);
+	
+					
+		
+
 	}
 	
 	private ArrayList<Lote> lotes()
