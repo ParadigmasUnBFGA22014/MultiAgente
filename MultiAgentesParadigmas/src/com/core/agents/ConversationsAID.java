@@ -7,6 +7,7 @@ public class ConversationsAID {
 	public static String LOTE_VENDIDO="Lote Vendido";
 	public static String LEILAO_ENCERRADO="acabou a festa";
 	
+	public static String OLA_VAMOS_INICIAR="Ola vamos iniciar o leilao?";
 	
 	
 

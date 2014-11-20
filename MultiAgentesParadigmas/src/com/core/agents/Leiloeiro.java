@@ -2,6 +2,7 @@ package com.core.agents;
 
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.SequentialBehaviour;
@@ -40,7 +41,7 @@ public class Leiloeiro extends Agent{
 			
 			DFService.register(leiloeiro, descricaoAgente);		
 			
-			System.out.println("Ol‡ meu nome Ž "+this.getLocalName()+ " e serei o leiloeiro de hoje!");
+			System.out.println(leiloeiro.getLocalName() +": "+  "Ol‡ meu nome Ž "+this.getLocalName()+ " e serei o leiloeiro de hoje!");
 			
 			leiloeiro.prepararLeilao();			
 
@@ -177,38 +178,54 @@ public class Leiloeiro extends Agent{
 					paginasAmarelas.addServices(servicoProcurado);
 					
 					leiloeiro.agenteArremantantes= DFService.search(leiloeiro, paginasAmarelas);
-					
-					
+
 					
 					if(leiloeiro.agenteArremantantes!=null  && leiloeiro.agenteArremantantes.length>0)
 					{
-						System.out.println("Muito bom temos "+leiloeiro.agenteArremantantes.length+ " participantes.\n");
+						System.out.println(leiloeiro.getLocalName() +": "+"Muito bom temos "+leiloeiro.agenteArremantantes.length+ " participantes.\n");
 						
 						for(DFAgentDescription arremantantes: leiloeiro.agenteArremantantes)
 						{
-							System.out.println("Ol‡ "+arremantantes.getName().getLocalName()+", bem vindo!");
+							System.out.println(leiloeiro.getLocalName() +": "+"Ol‡ "+arremantantes.getName().getLocalName()+", bem vindo!");
 						}
 						
 						
 					}else 
 					{
-						System.out.println("Ainda n‹o tem arrematantes no leilao, nao ser‡ possivel iniciar agora ");
+						System.out.println(leiloeiro.getLocalName() +": "+"Ainda n‹o tem arrematantes no leilao, nao ser‡ possivel iniciar agora ");
+						System.out.println(leiloeiro.getLocalName() +": "+"Vou aguardar mais um pouco e tentar novamente.");
+						
+						addBehaviour(new WakerBehaviour(leiloeiro,5000) 
+						{
+							public void onWake()
+							{
+								leiloeiro.prepararLeilao();
+							}
+						});
+						
 					}
-					
-				
 					
 					
 				}catch(FIPAException e)
 				{
 					e.printStackTrace();
 				}
-				
-					
-				
+
 			}
 		});
 		
+		if(leiloeiro.agenteArremantantes!=null)
+		{
+			System.out.println(leiloeiro.getLocalName() +": "+"Vamos iniciar o leil‹o..");
+			
+			
+			
+		}
+		
+		
+		
 		addBehaviour(prepararLeilao);
+		
 	
 					
 		
