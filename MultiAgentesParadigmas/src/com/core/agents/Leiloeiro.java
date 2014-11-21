@@ -46,6 +46,7 @@ public class Leiloeiro extends Agent{
 			leiloeiro.prepararLeilao();			
 
 			
+			
 		}catch(FIPAException e)
 		{
 			e.printStackTrace();
@@ -68,6 +69,8 @@ public class Leiloeiro extends Agent{
 	
 	private class Leiloar extends Behaviour
 	{
+		
+		private static final long serialVersionUID = 1L;
 		private long inicioLeilao=0;
 		private Lote loteCorrente=null;
 		private ArrayList<Lote> listaDeLotes=null;
@@ -75,11 +78,7 @@ public class Leiloeiro extends Agent{
 		private boolean fimLeilao=false;
 		private AID ganhadorAID=null;
 		private String ganhadorNome=null;
-		
-		
-		
-		
-		
+
 		@Override
 		public void onStart()
 		{
@@ -97,9 +96,9 @@ public class Leiloeiro extends Agent{
 		@Override
 		public void action() 
 		{
-			if(System.currentTimeMillis()%5000==0)
+			if(System.currentTimeMillis()%2000==0)
 			{
-			
+				
 				if(this.listaDeLotes!=null && this.listaDeLotes.size()>0)
 				{
 					try
@@ -116,20 +115,15 @@ public class Leiloeiro extends Agent{
 							{
 								if(lance.getPerformative()==ACLMessage.PROPOSE)
 								{
-									
 									this.ganhadorAID=lance.getSender();
 									this.ganhadorNome=lance.getSender().getLocalName();
 									
 									System.out.println(leiloeiro.getLocalName() +": "+" Recebi um lance do "+this.ganhadorNome);
 									
 									this.loteCorrente.setLanceCorrente(this.loteCorrente.getLanceCorrente()+this.loteCorrente.getValorIncremento());
-									travaPedidoLance=false;
-									
-								}
-								
+									travaPedidoLance=false;	
+								}	
 							}
-							
-							
 							
 							if(System.currentTimeMillis()-this.inicioLeilao>10000)
 							{
@@ -202,7 +196,8 @@ public class Leiloeiro extends Agent{
 
 								travaPedidoLance=true;
 							}
-							System.out.println(leiloeiro.getLocalName() +": R$ "+this.loteCorrente.getLanceCorrente()+" pelo/a "+this.loteCorrente.getObjeto().getNome());
+							System.out.println(leiloeiro.getLocalName() +": R$ "+this.loteCorrente.getLanceCorrente()+
+									" pelo/a "+this.loteCorrente.getObjeto().getNome());
 							
 						}
 						
@@ -226,7 +221,7 @@ public class Leiloeiro extends Agent{
 		{
 			
 			if(this.fimLeilao)
-				System.out.println(leiloeiro.getLocalName() +": "+" Leilão incerrado! Até mais pessoal ");
+				System.out.println(leiloeiro.getLocalName() +": "+" Leilão encerrado! Até mais pessoal ");
 				
 				return this.fimLeilao;
 			
