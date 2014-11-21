@@ -1,4 +1,4 @@
-package com.util.database.pojos;
+package com.util;
 
 public class Arrematante {
 	

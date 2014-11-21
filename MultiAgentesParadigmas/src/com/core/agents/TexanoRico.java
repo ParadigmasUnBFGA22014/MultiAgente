@@ -1,6 +1,6 @@
 package com.core.agents;
 
-import com.util.database.pojos.Lote;
+import com.util.Lote;
 
 import examples.yellowPages.DFRegisterAgent;
 import jade.core.Agent;
@@ -118,13 +118,28 @@ public class TexanoRico extends Agent {
 		}
 		private boolean ofertar(Lote lote)
 		{
+			boolean ofertar=false;
 			//Criterios de escolha 
 			if(lote.getLanceCorrente()<texanoRico.valorCarteira)
 			{
-				return true;
+				if(lote.getObjeto().getNome().equalsIgnoreCase("Cachorro") && lote.getLanceCorrente()<1000)
+				ofertar= true;
+				
+				if(lote.getObjeto().getNome().equalsIgnoreCase("Bicicleta"))
+				ofertar=false;
+				
+				if(lote.getObjeto().getNome().equalsIgnoreCase("BarrilPetroleo"))
+					ofertar= true;
+				
+				if(lote.getObjeto().getNome().equalsIgnoreCase("Computador") && lote.getLanceCorrente()<5000)
+					ofertar= true;
+				
+				
 			}
 			else
-			return false;
+				ofertar=false;
+				
+			return ofertar;
 		}
 		
 	}

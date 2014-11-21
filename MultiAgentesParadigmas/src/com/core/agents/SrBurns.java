@@ -1,6 +1,6 @@
 package com.core.agents;
 
-import com.util.database.pojos.Lote;
+import com.util.Lote;
 
 import examples.yellowPages.DFRegisterAgent;
 import jade.core.Agent;
@@ -118,14 +118,28 @@ public class SrBurns extends Agent {
 		}
 		private boolean ofertar(Lote lote)
 		{
+			boolean ofertar=false;
 			//Criterios de escolha 
 			if(lote.getLanceCorrente()<srBurns.valorCarteira)
 			{
-				return true;
+				if(lote.getObjeto().getNome().equalsIgnoreCase("Cachorro") )
+				ofertar= false;
+				
+				if(lote.getObjeto().getNome().equalsIgnoreCase("Bicicleta") && lote.getLanceCorrente()<600)
+				ofertar=true;
+				
+				if(lote.getObjeto().getNome().equalsIgnoreCase("BarrilPetroleo"))
+					ofertar= true;
+				
+				if(lote.getObjeto().getNome().equalsIgnoreCase("Computador") && lote.getLanceCorrente()<800)
+					ofertar= true;
+				
+				
 			}
 			else
-			return false;
-		}
+				ofertar=false;
+				
+			return ofertar;		}
 		
 	}
 

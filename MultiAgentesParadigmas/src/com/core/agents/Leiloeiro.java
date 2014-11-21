@@ -14,8 +14,8 @@ import jade.lang.acl.ACLMessage;
 
 import java.util.ArrayList;
 
-import com.util.database.pojos.Lote;
-import com.util.database.pojos.Objeto;
+import com.util.Lote;
+import com.util.Objeto;
 
 
 public class Leiloeiro extends Agent{
@@ -224,9 +224,6 @@ public class Leiloeiro extends Agent{
 			
 		}
 
-						
-	
-		
 	}
 	
 	private void prepararLeilao()
@@ -308,10 +305,10 @@ public class Leiloeiro extends Agent{
 		lote= new Lote();
 		objeto= new Objeto(01, "Bicicleta");
 		
-		lote.setLanceInicialValor(1000);
-		lote.setValorIncremento(100);
+		lote.setLanceInicialValor(100);
+		lote.setValorIncremento(50);
 		lote.setNumeroLote(001);
-		lote.setLanceCorrente(1000);
+		lote.setLanceCorrente(100);
 		lote.setObjeto(objeto);
 		
 		lotes.add(lote);
@@ -320,10 +317,10 @@ public class Leiloeiro extends Agent{
 		lote= new Lote();
 		objeto= new Objeto(02, "Computador");
 		
-		lote.setLanceInicialValor(5000);
-		lote.setValorIncremento(1000);
+		lote.setLanceInicialValor(300);
+		lote.setValorIncremento(50);
 		lote.setNumeroLote(002);
-		lote.setLanceCorrente(5000);
+		lote.setLanceCorrente(300);
 		lote.setObjeto(objeto);
 		
 		lotes.add(lote);
@@ -340,6 +337,22 @@ public class Leiloeiro extends Agent{
 		lote.setObjeto(objeto);
 		
 		lotes.add(lote);
+		
+
+		
+		//Lote 004
+		lote= new Lote();
+		objeto= new Objeto(04, "BarrilPetroleo");
+		
+		lote.setLanceInicialValor(200);
+		lote.setValorIncremento(100);
+		lote.setNumeroLote(004);
+		lote.setLanceCorrente(200);
+		lote.setObjeto(objeto);
+		
+		lotes.add(lote);
+		
+		
 		
 		
 		return lotes;
