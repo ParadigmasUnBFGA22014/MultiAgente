@@ -11,19 +11,20 @@ public class Lote  implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 	private Integer numeroLote;
-	private ArrayList<Objeto> objetosList;
+	private Objeto objeto;
 	
 	private double lanceCorrente;
 	private double lanceInicialValor;
 	private double valorIncremento;
 	
 	public Lote(){}
-	public Lote(Integer numeroLote,ArrayList<Objeto> objetosList, double lanceInicial,double valorIncremento)
+	public Lote(Integer numeroLote, double lanceInicial,double valorIncremento, Objeto objeto)
 	{
 		this.setNumeroLote(numeroLote);
-		this.setObjetosList(objetosList);
 		this.lanceInicialValor=lanceInicialValor;
 		this.valorIncremento=valorIncremento;
+		this.setObjeto(objeto);
+		
 	}
 	
 	
@@ -45,17 +46,18 @@ public class Lote  implements Serializable{
 	public void setNumeroLote(Integer numeroLote) {
 		this.numeroLote = numeroLote;
 	}
-	public ArrayList<Objeto> getObjetosList() {
-		return objetosList;
-	}
-	public void setObjetosList(ArrayList<Objeto> objetosList) {
-		this.objetosList = objetosList;
-	}
+	
 	public double getLanceCorrente() {
 		return lanceCorrente;
 	}
 	public void setLanceCorrente(double lanceCorrente) {
 		this.lanceCorrente = lanceCorrente;
+	}
+	public Objeto getObjeto() {
+		return objeto;
+	}
+	public void setObjeto(Objeto objeto) {
+		this.objeto = objeto;
 	}
 
 }

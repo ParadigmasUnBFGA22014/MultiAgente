@@ -43,11 +43,11 @@ public class Arrematante extends Agent {
 				
 			}
 			
-			addBehaviour(new ofertarLance());
-			
+						
 		  System.out.println("Oi meu nome eh "+this.getLocalName()+ " e tenho "+this.valorCarteira+" na carteira para gastar");
 			
-			
+		  addBehaviour(new ofertarLance());
+
 		}catch(FIPAException e )
 		{
 			e.printStackTrace();
@@ -71,6 +71,7 @@ public class Arrematante extends Agent {
 		/**
 		 * 
 		 */
+		private Lote loteComprado=null;
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -80,18 +81,31 @@ public class Arrematante extends Agent {
 			try
 			{
 				ACLMessage mensagem= myAgent.receive();
-				ACLMessage resposta;
+				ACLMessage resposta=null;
 				if(mensagem!=null)
 				{
 					if(mensagem.getPerformative()==ACLMessage.CFP)
 					{
+						
+						
 						if(ofertar((Lote) mensagem.getContentObject()))
 						{
-							resposta = mensagem.createReply();
-							resposta.setPerformative(ACLMessage.PROPOSE);
+							
+							resposta = new ACLMessage(ACLMessage.PROPOSE);
+							resposta.addReceiver(mensagem.getSender());
 							
 							myAgent.send(resposta);
 						}
+					}
+					if(mensagem.getPerformative()==ACLMessage.INFORM && mensagem.getConversationId().equalsIgnoreCase(ConversationsAID.PARABENS))
+					{
+						this.loteComprado=(Lote)mensagem.getContentObject();
+						arrematante.valorCarteira-=this.loteComprado.getLanceCorrente();
+						
+						System.out.println(arrematante.getLocalName()+": "+" Uhuuu ganhei!");
+						System.out.println(arrematante.getLocalName()+": "+" Agora tenho um/uma "+loteComprado.getObjeto().getNome());
+						System.out.println(arrematante.getLocalName()+": "+" Ainda tenho R$ "+arrematante.valorCarteira+ "pagar gastar!");
+						
 					}
 					
 				}else block();

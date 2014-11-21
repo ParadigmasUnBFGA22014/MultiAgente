@@ -3,7 +3,6 @@ package com.core.agents;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
-import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.WakerBehaviour;
@@ -16,6 +15,7 @@ import jade.lang.acl.ACLMessage;
 import java.util.ArrayList;
 
 import com.util.database.pojos.Lote;
+import com.util.database.pojos.Objeto;
 
 
 public class Leiloeiro extends Agent{
@@ -41,7 +41,7 @@ public class Leiloeiro extends Agent{
 			
 			DFService.register(leiloeiro, descricaoAgente);		
 			
-			System.out.println(leiloeiro.getLocalName() +": "+  "Olá meu nome é "+this.getLocalName()+ " e serei o leiloeiro de hoje!");
+			System.out.println(  "Olá meu nome é "+this.getLocalName()+ " e serei o leiloeiro de hoje!");
 			
 			leiloeiro.prepararLeilao();			
 
@@ -66,91 +66,166 @@ public class Leiloeiro extends Agent{
 	}
 	
 	
-	private class Leiloar extends CyclicBehaviour
+	private class Leiloar extends Behaviour
 	{
-
-		private static final long serialVersionUID = 1L;
-		private Lote lote=null;
-		private long startLeilaoLote=System.currentTimeMillis();
-		private String nomeGanhador=null;
-		private ArrayList<Lote>lotes=null;
+		private long inicioLeilao=0;
+		private Lote loteCorrente=null;
+		private ArrayList<Lote> listaDeLotes=null;
+		private boolean travaPedidoLance=false;
+		private boolean fimLeilao=false;
+		private AID ganhadorAID=null;
+		private String ganhadorNome=null;
 		
-		public Leiloar(ArrayList<Lote>lotes,Agent agent)
-		{
-			super(agent);
-			try
-			{
-				this.lotes=lotes;
-				this.lote=lotes.get(0);
-				this.lotes.remove(0);
-				
-			}catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-	
-		}
 		
 		
 		@Override
-		public void action()
+		public void onStart()
 		{
-			try
+			this.inicioLeilao=System.currentTimeMillis();
+			
+			this.listaDeLotes=leiloeiro.lotes();
+			this.loteCorrente=this.listaDeLotes.get(this.listaDeLotes.size()-1);
+			this.listaDeLotes.remove(this.listaDeLotes.size()-1);
+			
+			System.out.println(leiloeiro.getLocalName() +": "+"Muito bom, temos "+this.listaDeLotes.size()+" Lotes para leiloar");
+			System.out.println(leiloeiro.getLocalName() +": "+"Primeiro Lote pronto para leilao");
+			System.out.println(leiloeiro.getLocalName() +": "+"Vamos leiloar-> "+loteCorrente.getObjeto().getNome());
+			
+		}
+		@Override
+		public void action() 
+		{
+			if(this.listaDeLotes!=null && this.listaDeLotes.size()>0)
 			{
-				ACLMessage mensagens=myAgent.receive();
-				if(mensagens!=null)
+				try
 				{
-					if(mensagens.getPerformative()==ACLMessage.PROPOSE)
+					ACLMessage pedidoDeLance=null;
+					ACLMessage lance=null;
+					ACLMessage avisoGanhador=null;
+					lance=myAgent.receive();
+					
+					if(travaPedidoLance)
 					{
 						
-						lote.setLanceCorrente(lote.getLanceCorrente()*leiloeiro.qtdLances);
-						nomeGanhador=mensagens.getContent();
-						leiloeiro.qtdLances++;
-						
-					}
-					if((startLeilaoLote-System.currentTimeMillis())>10000)
-					{
-						ACLMessage loteVendido= new ACLMessage(ACLMessage.INFORM);
-						
-						loteVendido.setConversationId(ConversationsAID.LOTE_VENDIDO);
-						loteVendido.setContent(nomeGanhador);
-						loteVendido.setContentObject(lote);
-						loteVendido.addReceiver(agenteAuxiliarAID);
-						
-						myAgent.send(loteVendido);
-						
-						if(lotes!=null &&lotes.size()>=1)
+						if(lance!=null)
 						{
-							lote=lotes.get(0);
-							lotes.remove(0);
-							
-							ACLMessage loteAvenda= new ACLMessage(ACLMessage.INFORM);
-							loteAvenda.addReceiver(agenteAuxiliarAID);
-							loteAvenda.setContentObject(lote);
-							loteAvenda.setConversationId(ConversationsAID.LOTE_A_VENDA);
-							
-							myAgent.send(loteAvenda);
-							
-						}else
-						{
-							ACLMessage leilaoEncerrado= new ACLMessage(ACLMessage.INFORM);
-							leilaoEncerrado.setConversationId(ConversationsAID.LEILAO_ENCERRADO);
-							leilaoEncerrado.addReceiver(agenteAuxiliarAID);
-							
-							myAgent.send(leilaoEncerrado);
-							myAgent.removeBehaviour(this);
+							if(lance.getPerformative()==ACLMessage.PROPOSE)
+							{
+								
+								this.ganhadorAID=lance.getSender();
+								this.ganhadorNome=lance.getSender().getLocalName();
+								
+								System.out.println(leiloeiro.getLocalName() +": "+" Recebi um lance do "+this.ganhadorNome);
+								
+								this.loteCorrente.setLanceCorrente(this.loteCorrente.getLanceCorrente()+this.loteCorrente.getValorIncremento());
+								travaPedidoLance=false;
+								
+							}
 							
 						}
 						
-					}
-				}else block();
-				
-			}catch(Exception e)
-			{
-				e.printStackTrace();
-			}
 						
+						
+						if(System.currentTimeMillis()-this.inicioLeilao>5000)
+						{
+							
+							if(this.listaDeLotes.size()==0) this.fimLeilao=true;else this.fimLeilao=false;
+							
+							if(this.ganhadorAID!=null)
+							{
+								System.out.println(leiloeiro.getLocalName() +": "+"PARABENS "+ganhadorNome+" voce ganhou!");
+								
+								avisoGanhador=new ACLMessage(ACLMessage.INFORM);
+								avisoGanhador.setConversationId(ConversationsAID.PARABENS);
+								avisoGanhador.setContentObject(this.loteCorrente);
+								avisoGanhador.addReceiver(ganhadorAID);
+								
+								myAgent.send(avisoGanhador);
+								
+								//Pega proximo lote 
+								//Codigo duplicado
+								this.ganhadorAID=null;
+								this.ganhadorNome=null;
+								this.loteCorrente=this.listaDeLotes.get(this.listaDeLotes.size()-1);
+								this.listaDeLotes.remove(this.listaDeLotes.size()-1);
+								
+								System.out.println(leiloeiro.getLocalName() +": "+"Ok, vamos ao proximo Lote");
+								System.out.println(leiloeiro.getLocalName() +": "+"vamos leiloar-> "+this.loteCorrente.getObjeto().getNome());
+								
+								this.inicioLeilao=System.currentTimeMillis();
+								travaPedidoLance=false;
+								//Fim codigo duplicado
+								
+							}else
+							{
+								if(!this.fimLeilao)
+								{
+									System.out.println(leiloeiro.getLocalName() +": "+"Nenhuma oferta pelo(a) "+this.loteCorrente.getObjeto().getNome());
+									System.out.println(leiloeiro.getLocalName() +": "+"Ok, vamos ao proximo lote");
+									
+									//Pega proximo lote 
+									//Codigo duplicado
+									this.ganhadorAID=null;
+									this.ganhadorNome=null;
+									this.loteCorrente=this.listaDeLotes.get(this.listaDeLotes.size()-1);
+									this.listaDeLotes.remove(this.listaDeLotes.size()-1);
+									
+									System.out.println(leiloeiro.getLocalName() +": "+"Ok, vamos ao proximo Lote");
+									System.out.println(leiloeiro.getLocalName() +": "+"vamos leiloar-> "+this.loteCorrente.getObjeto().getNome());
+									
+									this.inicioLeilao=System.currentTimeMillis();
+									travaPedidoLance=false;
+									//Fim codigo duplicado
+								}
+								
+							}
+							
+	
+							
+						}
+						
+					}else
+					{
+						
+						for(DFAgentDescription arrematantes:leiloeiro.agenteArremantantes)
+						{
+							pedidoDeLance= new ACLMessage(ACLMessage.CFP);
+							pedidoDeLance.setContentObject(this.loteCorrente);
+							pedidoDeLance.addReceiver(arrematantes.getName());
+							
+							myAgent.send(pedidoDeLance);
+
+							travaPedidoLance=true;
+						}
+						System.out.println(leiloeiro.getLocalName() +": R$ "+this.loteCorrente.getLanceCorrente()+" pelo/a "+this.loteCorrente.getObjeto().getNome());
+						
+					}
+					
+					
+				}catch(Exception e)
+				{
+					e.printStackTrace();
+				}
+				
+			}
+			
+			
+			
 		}
+
+		@Override
+		public boolean done() 
+		{
+			
+			if(this.fimLeilao)
+				System.out.println(leiloeiro.getLocalName() +": "+" Leilão incerrado! Até mais pessoal ");
+				
+				return this.fimLeilao;
+			
+		}
+
+						
+	
 		
 	}
 	
@@ -189,6 +264,8 @@ public class Leiloeiro extends Agent{
 							System.out.println(leiloeiro.getLocalName() +": "+"Olá "+arremantantes.getName().getLocalName()+", bem vindo!");
 						}
 						
+						addBehaviour(new Leiloar());
+						
 						
 					}else 
 					{
@@ -212,46 +289,58 @@ public class Leiloeiro extends Agent{
 				}
 
 			}
-		});
-		
-		if(leiloeiro.agenteArremantantes!=null)
-		{
-			System.out.println(leiloeiro.getLocalName() +": "+"Vamos iniciar o leilão..");
-			
-			
-			
-		}
-		
+		});//fim comportamento
 		
 		
 		addBehaviour(prepararLeilao);
-		
-	
-					
-		
+
 
 	}
 	
 	private ArrayList<Lote> lotes()
 	{
+		
 		ArrayList<Lote>lotes=new ArrayList<Lote>();
 		Lote lote=null;
+		Objeto objeto=null;
 		
+		//Lote 001
 		lote= new Lote();
+		objeto= new Objeto(01, "Bicicleta");
 		
 		lote.setLanceInicialValor(1000);
 		lote.setValorIncremento(100);
 		lote.setNumeroLote(001);
 		lote.setLanceCorrente(1000);
+		lote.setObjeto(objeto);
 		
 		lotes.add(lote);
+		
+		//Lote 002
+		lote= new Lote();
+		objeto= new Objeto(02, "Computador");
 		
 		lote.setLanceInicialValor(5000);
 		lote.setValorIncremento(1000);
 		lote.setNumeroLote(002);
 		lote.setLanceCorrente(5000);
+		lote.setObjeto(objeto);
 		
 		lotes.add(lote);
+		
+		
+		//Lote 003
+		lote= new Lote();
+		objeto= new Objeto(03, "Cachorro");
+		
+		lote.setLanceInicialValor(100);
+		lote.setValorIncremento(50);
+		lote.setNumeroLote(003);
+		lote.setLanceCorrente(100);
+		lote.setObjeto(objeto);
+		
+		lotes.add(lote);
+		
 		
 		return lotes;
 	}

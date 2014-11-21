@@ -10,12 +10,10 @@ public class Objeto implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private int id;
 	private String nome;
-	private Byte foto;
-	
-	
+
 	
 	public Objeto(){}
-	public Objeto(int id, String nome,double lanceInicialValor,double valorIncremento)
+	public Objeto(int id, String nome)
 	{
 		this.id=id;
 		this.nome=nome;

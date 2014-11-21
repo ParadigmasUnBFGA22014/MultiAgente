@@ -8,6 +8,7 @@ public class ConversationsAID {
 	public static String LEILAO_ENCERRADO="acabou a festa";
 	
 	public static String OLA_VAMOS_INICIAR="Ola vamos iniciar o leilao?";
+	public static String PARABENS="Parabens, voce ganhou!";
 	
 	
 
