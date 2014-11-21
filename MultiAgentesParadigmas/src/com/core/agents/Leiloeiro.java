@@ -78,6 +78,8 @@ public class Leiloeiro extends Agent{
 		
 		
 		
+		
+		
 		@Override
 		public void onStart()
 		{
@@ -95,73 +97,55 @@ public class Leiloeiro extends Agent{
 		@Override
 		public void action() 
 		{
-			if(this.listaDeLotes!=null && this.listaDeLotes.size()>0)
+			if(System.currentTimeMillis()%5000==0)
 			{
-				try
+			
+				if(this.listaDeLotes!=null && this.listaDeLotes.size()>0)
 				{
-					ACLMessage pedidoDeLance=null;
-					ACLMessage lance=null;
-					ACLMessage avisoGanhador=null;
-					lance=myAgent.receive();
-					
-					if(travaPedidoLance)
+					try
 					{
+						ACLMessage pedidoDeLance=null;
+						ACLMessage lance=null;
+						ACLMessage avisoGanhador=null;
+						lance=myAgent.receive();
 						
-						if(lance!=null)
+						if(travaPedidoLance)
 						{
-							if(lance.getPerformative()==ACLMessage.PROPOSE)
+							
+							if(lance!=null)
 							{
-								
-								this.ganhadorAID=lance.getSender();
-								this.ganhadorNome=lance.getSender().getLocalName();
-								
-								System.out.println(leiloeiro.getLocalName() +": "+" Recebi um lance do "+this.ganhadorNome);
-								
-								this.loteCorrente.setLanceCorrente(this.loteCorrente.getLanceCorrente()+this.loteCorrente.getValorIncremento());
-								travaPedidoLance=false;
+								if(lance.getPerformative()==ACLMessage.PROPOSE)
+								{
+									
+									this.ganhadorAID=lance.getSender();
+									this.ganhadorNome=lance.getSender().getLocalName();
+									
+									System.out.println(leiloeiro.getLocalName() +": "+" Recebi um lance do "+this.ganhadorNome);
+									
+									this.loteCorrente.setLanceCorrente(this.loteCorrente.getLanceCorrente()+this.loteCorrente.getValorIncremento());
+									travaPedidoLance=false;
+									
+								}
 								
 							}
 							
-						}
-						
-						
-						
-						if(System.currentTimeMillis()-this.inicioLeilao>5000)
-						{
 							
-							if(this.listaDeLotes.size()==0) this.fimLeilao=true;else this.fimLeilao=false;
 							
-							if(this.ganhadorAID!=null)
+							if(System.currentTimeMillis()-this.inicioLeilao>10000)
 							{
-								System.out.println(leiloeiro.getLocalName() +": "+"PARABENS "+ganhadorNome+" voce ganhou!");
 								
-								avisoGanhador=new ACLMessage(ACLMessage.INFORM);
-								avisoGanhador.setConversationId(ConversationsAID.PARABENS);
-								avisoGanhador.setContentObject(this.loteCorrente);
-								avisoGanhador.addReceiver(ganhadorAID);
+								if(this.listaDeLotes.size()==0) this.fimLeilao=true;else this.fimLeilao=false;
 								
-								myAgent.send(avisoGanhador);
-								
-								//Pega proximo lote 
-								//Codigo duplicado
-								this.ganhadorAID=null;
-								this.ganhadorNome=null;
-								this.loteCorrente=this.listaDeLotes.get(this.listaDeLotes.size()-1);
-								this.listaDeLotes.remove(this.listaDeLotes.size()-1);
-								
-								System.out.println(leiloeiro.getLocalName() +": "+"Ok, vamos ao proximo Lote");
-								System.out.println(leiloeiro.getLocalName() +": "+"vamos leiloar-> "+this.loteCorrente.getObjeto().getNome());
-								
-								this.inicioLeilao=System.currentTimeMillis();
-								travaPedidoLance=false;
-								//Fim codigo duplicado
-								
-							}else
-							{
-								if(!this.fimLeilao)
+								if(this.ganhadorAID!=null)
 								{
-									System.out.println(leiloeiro.getLocalName() +": "+"Nenhuma oferta pelo(a) "+this.loteCorrente.getObjeto().getNome());
-									System.out.println(leiloeiro.getLocalName() +": "+"Ok, vamos ao proximo lote");
+									System.out.println(leiloeiro.getLocalName() +": "+"PARABENS "+ganhadorNome+" voce ganhou!");
+									
+									avisoGanhador=new ACLMessage(ACLMessage.INFORM);
+									avisoGanhador.setConversationId(ConversationsAID.PARABENS);
+									avisoGanhador.setContentObject(this.loteCorrente);
+									avisoGanhador.addReceiver(ganhadorAID);
+									
+									myAgent.send(avisoGanhador);
 									
 									//Pega proximo lote 
 									//Codigo duplicado
@@ -176,40 +160,64 @@ public class Leiloeiro extends Agent{
 									this.inicioLeilao=System.currentTimeMillis();
 									travaPedidoLance=false;
 									//Fim codigo duplicado
+									
+								}else
+								{
+									if(!this.fimLeilao)
+									{
+										System.out.println(leiloeiro.getLocalName() +": "+"Nenhuma oferta pelo(a) "+this.loteCorrente.getObjeto().getNome());
+										System.out.println(leiloeiro.getLocalName() +": "+"Ok, vamos ao proximo lote");
+										
+										//Pega proximo lote 
+										//Codigo duplicado
+										this.ganhadorAID=null;
+										this.ganhadorNome=null;
+										this.loteCorrente=this.listaDeLotes.get(this.listaDeLotes.size()-1);
+										this.listaDeLotes.remove(this.listaDeLotes.size()-1);
+										
+										System.out.println(leiloeiro.getLocalName() +": "+"Ok, vamos ao proximo Lote");
+										System.out.println(leiloeiro.getLocalName() +": "+"vamos leiloar-> "+this.loteCorrente.getObjeto().getNome());
+										
+										this.inicioLeilao=System.currentTimeMillis();
+										travaPedidoLance=false;
+										//Fim codigo duplicado
+									}
+									
 								}
+								
+		
 								
 							}
 							
-	
-							
-						}
-						
-					}else
-					{
-						
-						for(DFAgentDescription arrematantes:leiloeiro.agenteArremantantes)
+						}else
 						{
-							pedidoDeLance= new ACLMessage(ACLMessage.CFP);
-							pedidoDeLance.setContentObject(this.loteCorrente);
-							pedidoDeLance.addReceiver(arrematantes.getName());
 							
-							myAgent.send(pedidoDeLance);
+							for(DFAgentDescription arrematantes:leiloeiro.agenteArremantantes)
+							{
+								pedidoDeLance= new ACLMessage(ACLMessage.CFP);
+								pedidoDeLance.setContentObject(this.loteCorrente);
+								pedidoDeLance.addReceiver(arrematantes.getName());
+								
+								myAgent.send(pedidoDeLance);
 
-							travaPedidoLance=true;
+								travaPedidoLance=true;
+							}
+							System.out.println(leiloeiro.getLocalName() +": R$ "+this.loteCorrente.getLanceCorrente()+" pelo/a "+this.loteCorrente.getObjeto().getNome());
+							
 						}
-						System.out.println(leiloeiro.getLocalName() +": R$ "+this.loteCorrente.getLanceCorrente()+" pelo/a "+this.loteCorrente.getObjeto().getNome());
 						
+						
+					}catch(Exception e)
+					{
+						e.printStackTrace();
 					}
 					
-					
-				}catch(Exception e)
-				{
-					e.printStackTrace();
 				}
 				
-			}
-			
-			
+				
+				
+				
+			}//fim delay 
 			
 		}
 
